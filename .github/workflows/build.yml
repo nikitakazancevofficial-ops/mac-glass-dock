@@ -1,0 +1,32 @@
+name: Arch build and tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  dock:
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    timeout-minutes: 25
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - name: Install Arch dependencies
+        run: >-
+          pacman -Syu --noconfirm --needed git cmake python ripgrep pkgconf
+          qt6-base qt6-declarative qt6-shadertools qt6-svg qt6-wayland qt6-tools
+          layer-shell-qt kwindowsystem kservice kio kwayland breeze-icons
+          vulkan-headers kpipewire
+      - uses: actions/checkout@v4
+      - name: Check script syntax
+        run: bash -n scripts/build.sh scripts/install.sh scripts/session.sh scripts/refraction.sh scripts/system-info.sh
+      - name: Build Dock and regression tests
+        run: ./scripts/build.sh --tests
+      - name: Run tests in private XDG directories
+        run: ctest --test-dir build --output-on-failure
+      - name: Explain coverage
+        run: echo 'Offscreen tests do not validate compositor rendering. The KWin module requires a separately tested matching ABI.'

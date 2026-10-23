@@ -1,0 +1,38 @@
+name: System compatibility / Совместимость
+description: Request support or report a successful setup / Запросить поддержку системы или рассказать об успешном запуске
+title: "[System]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Your report helps prioritize supported systems. English and Russian welcome. / Твой отчёт помогает выбрать, какие системы поддерживать дальше. Можно по-русски или по-английски."
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result / Результат
+      options:
+        - Works well / Всё работает
+        - Partly works / Работает частично
+        - Does not start or build / Не запускается или не собирается
+        - Request support before installing / Хочу поддержку до установки
+    validations:
+      required: true
+  - type: textarea
+    id: system
+    attributes:
+      label: System information / Информация о системе
+      description: "Run ./scripts/system-info.sh and review before pasting. Add GPU driver and monitor resolution/scale. / Выполни ./scripts/system-info.sh, проверь вывод, добавь драйвер и разрешение/масштаб монитора."
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: features
+    attributes:
+      label: What works and what needs support? / Что работает и что нужно поддержать?
+      description: "Glass, Genie, autohide, previews, autostart, screen/keyboard brightness, multi-monitor. / Стекло, Genie, автоскрытие, миниатюры, автозапуск, яркость экрана/клавиатуры, мониторы."
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Extra details / Подробности
+      description: "Errors, screenshots without private details, commit version, packages. / Ошибки, скриншоты без личных данных, коммит и пакеты."

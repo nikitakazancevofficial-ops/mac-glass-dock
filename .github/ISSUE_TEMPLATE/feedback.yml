@@ -1,0 +1,27 @@
+name: Feedback or idea / Отзыв или идея
+description: Share your impression or suggest an improvement / Поделиться впечатлением или предложить улучшение
+title: "[Feedback]: "
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Topic / Тема
+      options:
+        - Feedback / Отзыв
+        - Feature request / Новая возможность
+        - Documentation or translation / Инструкция или перевод
+        - Accessibility / Доступность
+    validations:
+      required: true
+  - type: textarea
+    id: message
+    attributes:
+      label: Tell me / Расскажи
+      description: "English or Russian. For ideas, explain the problem and the desired result. / По-русски или по-английски. Для идеи опиши задачу и желаемый результат."
+    validations:
+      required: true
+  - type: textarea
+    id: system
+    attributes:
+      label: Your setup, if relevant / Твоя система, если относится к вопросу
+      description: "Distro, KDE/KWin, GPU, monitor scale. / Дистрибутив, KDE/KWin, видеокарта, масштаб."

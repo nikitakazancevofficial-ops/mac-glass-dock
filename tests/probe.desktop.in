@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Dock Launch Probe
+Icon=system-run
+Exec="@CMAKE_CURRENT_BINARY_DIR@/dock-launch-probe" "@CMAKE_CURRENT_BINARY_DIR@/test-launch.marker"
+Terminal=false
+StartupNotify=false

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Installation and guide / Установка и инструкция
+    url: https://github.com/nikitakazancevofficial-ops/mac-glass-dock#install-on-arch-linux
+    about: English guide / Английская инструкция
+  - name: Русская инструкция / Russian guide
+    url: https://github.com/nikitakazancevofficial-ops/mac-glass-dock/blob/main/README.ru.md
+    about: Установка, автозапуск, стекло и восстановление панели

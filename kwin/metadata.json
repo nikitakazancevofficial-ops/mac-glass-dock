@@ -1,0 +1,11 @@
+{
+  "KPlugin": {
+    "Id": "macglassrefraction",
+    "Name": "Mac Glass Dock Refraction",
+    "Description": "Opt-in background lenses for Mac Glass Dock only",
+    "Version": "0.1",
+    "License": "LicenseRef-MacGlass-Personal-NonCommercial-1.0",
+    "EnabledByDefault": false
+  },
+  "X-KDE-Ordering": 19
+}

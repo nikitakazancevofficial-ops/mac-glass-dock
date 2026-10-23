@@ -1,0 +1,44 @@
+name: Bug report / Ошибка
+description: Something is not working / Что-то не работает
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "English or Russian welcome. Please remove private data from logs/screenshots. / Можно по-русски или по-английски. Убери личные данные из логов и скриншотов."
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened? / Что произошло?
+      description: Expected and actual behaviour / Ожидаемый и фактический результат
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / Как повторить
+      placeholder: "1. Start Dock / Запустить Dock\n2. ..."
+    validations:
+      required: true
+  - type: textarea
+    id: system
+    attributes:
+      label: Your system / Твоя система
+      description: "Paste reviewed output of ./scripts/system-info.sh. Add GPU driver, monitor resolution and scale. / Вставь проверенный вывод ./scripts/system-info.sh, добавь драйвер, разрешение и масштаб."
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: glass
+    attributes:
+      label: Glass mode / Режим стекла
+      options:
+        - Full KWin refraction / Полное преломление KWin
+        - Basic native blur / Базовое размытие
+        - Not sure / Не знаю
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs, screenshots, version / Логи, скриншоты, версия
+      description: "Include the commit (git rev-parse --short HEAD), errors and screenshots if useful. / Добавь коммит, ошибки и скриншоты по необходимости."

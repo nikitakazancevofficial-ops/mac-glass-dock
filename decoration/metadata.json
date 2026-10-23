@@ -1,0 +1,11 @@
+{
+  "KPackageStructure": "KWin/Decoration",
+  "KPlugin": {
+    "Id": "org.macglass.decoration",
+    "Name": "Mac Glass — Soft Corners",
+    "Description": "Quiet rounded titlebars and working traffic-light window controls",
+    "Version": "1.0",
+    "License": "LicenseRef-MacGlass-Personal-NonCommercial-1.0",
+    "Authors": [{"Name": "Mac Glass Dock contributors"}]
+  }
+}
