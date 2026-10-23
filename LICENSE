@@ -1,0 +1,60 @@
+Mac Glass Dock Personal Noncommercial License 1.0
+SPDX identifier: LicenseRef-MacGlass-Personal-NonCommercial-1.0
+
+Copyright (c) 2026 Nikita Kazantsev and contributors.
+
+1. Scope
+This license applies to the original source code, scripts, documentation and
+original artwork of Mac Glass Dock, except where a file explicitly identifies
+independent third-party material. Third-party software, trademarks, application
+logos and wallpaper retain their respective owners' rights and licenses.
+
+2. Permission
+You may download, inspect, run and modify the Software as an individual for
+private, personal, noncommercial purposes, free of charge.
+You may make public forks and redistribute original or modified source copies
+free of charge for the same personal, noncommercial purposes, provided that you
+include this complete license, preserve copyright and attribution notices, mark
+substantial changes, and do not impose terms that contradict this license.
+Noncommercial screenshots, demonstrations, reviews and links to the project
+are permitted. You are not required to star, donate to or promote the project.
+
+3. Commercial use is not permitted
+You may not sell, rent, sublicense for a fee, or otherwise commercially exploit
+the Software or modified versions. Use in a business, paid work, a commercial
+product or service, an organizational deployment, or for a client's benefit is
+not permitted. Distribution as part of a paid product, paid customization,
+commercial hosting, and advertising or marketing use of the Software are not
+permitted. Removing these restrictions from a copy is not permitted.
+
+4. Ownership and contributions
+This license does not transfer ownership or grant trademark rights.
+Contributions intentionally submitted for inclusion in this project must be
+available under this same license, and the contributor must have the right to
+submit them. No rights in independently licensed dependencies are restricted
+by this license. Existing valid third-party license grants remain unaffected.
+
+5. No warranty
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE AUTHORS AND
+CONTRIBUTORS ARE NOT LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING
+FROM THE SOFTWARE OR ITS USE.
+
+6. Termination
+If you violate this license, the permissions it grants terminate. Rights that
+cannot be excluded by applicable law are not affected.
+
+This is a source-available personal-use license, not an OSI-approved open-source
+license. The English text above is the controlling license. The Russian summary
+below is provided for convenience.
+
+Кратко по-русски
+Бесплатно для личного некоммерческого использования. Можно изучать исходники,
+менять их для себя и бесплатно делиться оригинальными или изменёнными исходниками
+на тех же условиях, сохраняя лицензию и указание авторства. Существенные изменения
+нужно отметить. Разрешены некоммерческие обзоры, демонстрации и публичные форки.
+Коммерческое использование, продажа, платные продукты/услуги, работа для бизнеса
+или клиента и использование в организациях запрещены. Звёздочка и продвижение
+не обязательны. Гарантий нет; применяются ограничения ответственности выше.
+Собственные лицензии сторонних зависимостей не изменяются.
