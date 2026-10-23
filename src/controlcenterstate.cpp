@@ -179,7 +179,7 @@ void ControlCenterState::applyPendingWrites() {
     const int keyboardBrightness = m_pendingKeyboardBrightness;
 
     if (volume >= 0) {
-        runProgram(QStringLiteral("wpctl"), {QStringLiteral("set-volume"), QStringLiteral("@DEFAULT_AUDIO_SINK@"), QStringLiteral("%1%%").arg(volume)},
+        runProgram(QStringLiteral("wpctl"), {QStringLiteral("set-volume"), QStringLiteral("@DEFAULT_AUDIO_SINK@"), QStringLiteral("%1%").arg(volume)},
                    [this, volume](const QString &, int exitCode) {
             if (exitCode == 0 && m_pendingVolume == volume) m_pendingVolume = -1;
             refreshSliderState();

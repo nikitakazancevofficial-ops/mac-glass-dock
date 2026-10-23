@@ -20,6 +20,8 @@ Live desktop refraction · spring magnification · Genie animations · a glass a
 
 </div>
 
+**Update — 23 October 2026:** Fixed volume control in Control Center. The slider now correctly changes the system output volume. Pull the latest code, rebuild and restart Dock to get the fix. [Details](docs/RELEASE_NOTES.md).
+
 ## Why this dock?
 
 I wanted a Linux dock that feels like a piece of glass: a rounded, illuminated edge, individual icon lenses, and a desktop that bends through the material as it moves. Mac Glass Dock is my take on that idea, built with C++, Qt Quick and a custom KWin effect.
