@@ -79,26 +79,41 @@ def quote_exec(path):
     return '"' + str(path).replace('\\', '\\\\').replace('"', '\\"').replace('`', '\\`').replace('$', '\\$').replace('%', '%%') + '"'
 
 def systemd_quote(value):
-    return '"' + str(value).replace('\\', '\\\\').replace('"', '\\"') + '"'
+    return '"' + str(value).replace('\\', '\\\\').replace('"', '\\"').replace('%', '%%') + '"'
 
 def systemd_autostart(enabled):
     unit_name = 'mac-glass-dock-login.service'
     unit = CONFIG / 'systemd/user' / unit_name
+    app_name = 'mac-glass-dock.service'
+    app_unit = CONFIG / 'systemd/user' / app_name
+    command = systemd_quote(sys.executable) + ' ' + systemd_quote(STATE / 'recover.py')
+    # Keep the running Dock open when autostart is disabled, but remove its
+    # restart policy so an explicit quit/desktop restore remains effective.
+    atomic(app_unit, '[Unit]\nDescription=Mac Glass Dock\n'
+           'After=graphical-session.target\nPartOf=graphical-session.target\nStartLimitIntervalSec=0\n\n'
+           '[Service]\nType=simple\nExecStart=' + command + ' run-dock\n'
+           'Restart=' + ('always' if enabled else 'no') + '\nRestartSec=3\nTimeoutStopSec=10\n\n'
+           '[Install]\nWantedBy=graphical-session.target\n')
     if enabled:
-        atomic(unit, '[Unit]\nDescription=Mac Glass Dock login startup\n'
-               'After=graphical-session.target\nPartOf=graphical-session.target\n\n'
-               '[Service]\nType=oneshot\nExecStart=' + systemd_quote(sys.executable) + ' '
-               + systemd_quote(STATE / 'recover.py') + ' login\nRemainAfterExit=yes\n\n'
+        atomic(unit, '[Unit]\nDescription=Mac Glass Dock startup and resume recovery\n'
+               'After=graphical-session.target\nPartOf=graphical-session.target\nStartLimitIntervalSec=0\n\n'
+               '[Service]\nType=simple\nExecStart=' + command + ' supervise\n'
+               'Restart=always\nRestartSec=3\nTimeoutStopSec=10\n\n'
                '[Install]\nWantedBy=graphical-session.target\n')
         run('systemctl', '--user', 'daemon-reload')
+        run('systemctl', '--user', 'enable', app_name)
         run('systemctl', '--user', 'enable', '--now', unit_name)
     else:
         try:
-            run('systemctl', '--user', 'disable', '--now', unit_name)
+            run('systemctl', '--user', 'disable', unit_name)
         except RuntimeError:
             pass
+        run('systemctl', '--user', 'disable', app_name)
         unit.unlink(missing_ok=True)
         run('systemctl', '--user', 'daemon-reload')
+        # Update the app's restart policy before stopping the supervisor: the
+        # recovery path may be running inside that very service.
+        run('systemctl', '--user', 'stop', '--no-block', unit_name)
 
 def recovery_entry(record):
     startup = CONFIG / 'autostart/org.macglass.Recovery.desktop'
@@ -172,10 +187,67 @@ def dock_ready():
         screen = value.get('dock', {}).get('screen', {})
         return (value.get('pid', 0) > 0 and bool(value.get('dock', {}).get('surface'))
                 and screen.get('w', 0) >= 800 and screen.get('h', 0) >= 600)
-    except (RuntimeError, ValueError):
+    except (RuntimeError, ValueError, OSError, subprocess.TimeoutExpired):
         return False
 
 def login(record):
+    if record.get('autostart'):
+        # All desktop entry/script hooks converge on one supervisor, including
+        # KDE's migrated old-autostart-scripts hook. Never detach an untracked Dock.
+        run('systemctl', '--user', 'start', '--no-block', 'mac-glass-dock-login.service')
+
+def run_dock(record):
+    project = Path(record['project'])
+    if not (project / 'build/mac-glass-dock').is_file() or not (project / 'scripts/session.sh').is_file():
+        raise RuntimeError('Saved Dock project/build is missing')
+    deadline = time.monotonic() + 60
+    while True:
+        try:
+            run('qdbus6', 'org.kde.KWin', '/KWin')
+            run('qdbus6', 'org.kde.plasmashell', '/PlasmaShell')
+            break
+        except RuntimeError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(1)
+    # Replace this helper so systemd directly tracks the real Dock process.
+    launcher = str(project / 'scripts/session.sh')
+    os.execv(launcher, [launcher])
+
+def suspend_time():
+    # CLOCK_BOOTTIME includes suspend; monotonic does not. Unlike wall time,
+    # this detects wakeup without false restarts after an NTP/timezone change.
+    return time.clock_gettime(time.CLOCK_BOOTTIME) - time.monotonic()
+
+def supervise(record):
+    if not record.get('autostart'):
+        return
+    STATE.mkdir(parents=True, exist_ok=True)
+    with (STATE / 'supervise.lock').open('a') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        slept = suspend_time()
+        wait_for_dock(record)
+        failures = 0
+        while state().get('autostart'):
+            time.sleep(2)
+            now = suspend_time()
+            resumed = now - slept > 1
+            slept = now
+            failures = 0 if dock_ready() else failures + 1
+            if resumed or failures >= 3:
+                with (STATE / 'login.log').open('a') as log:
+                    log.write('Recreating Dock after resume\n' if resumed else 'Recovering unresponsive Dock\n')
+                run('systemctl', '--user', 'restart', '--no-block', 'mac-glass-dock.service')
+                # Give the previous DBus owner time to exit before checking the
+                # replacement. No restart loop while outputs/KDE settle.
+                time.sleep(2)
+                wait_for_dock(state())
+                failures = 0
+
+def wait_for_dock(record):
     global PROJECT
     if not record.get('autostart'):
         return
@@ -202,32 +274,20 @@ def login(record):
                         if time.monotonic() >= deadline:
                             raise
                         time.sleep(1)
-                process = None
                 if not dock_ready():
-                    process = subprocess.Popen([str(PROJECT / 'scripts/session.sh')],
-                                               stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+                    run('systemctl', '--user', 'start', '--no-block', 'mac-glass-dock.service')
                 for attempt in range(240):
                     if dock_ready():
                         if record.get('active'):
                             activate(record)  # Preserve the previously chosen left-panel layout.
                         log.write('Dock ready; existing preferences and desktop backup preserved\n')
                         return
-                    if process is not None and process.poll() is not None:
-                        permanent_failure = True
-                        raise RuntimeError('Dock exited during startup')
                     time.sleep(.25)
                 raise RuntimeError('Dock did not become ready')
             except Exception as error:
                 log.write('Startup failed: ' + str(error) + '\n')
-                if 'process' in locals() and process is not None and process.poll() is None:
-                    process.terminate()
-                    try:
-                        process.wait(timeout=3)
-                    except subprocess.TimeoutExpired:
-                        process.kill()
-                        process.wait(timeout=3)
-                # A missing build or failed child needs intervention. A KDE
-                # readiness race can be retried at the next login instead.
+                # Only a missing checkout is permanent. Crashes and temporary
+                # output/KDE loss keep automatic recovery enabled.
                 if permanent_failure:
                     restore(record)
                 elif record.get('autostart'):
@@ -326,7 +386,7 @@ def restore(record):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=['status', 'activate', 'restore', 'restore-login', 'decorate', 'restore-decoration', 'enable-autostart', 'disable-autostart', 'login'])
+    parser.add_argument('action', choices=['status', 'activate', 'restore', 'restore-login', 'decorate', 'restore-decoration', 'enable-autostart', 'disable-autostart', 'login', 'run-dock', 'supervise'])
     args = parser.parse_args()
     record = state()
     if args.action == 'activate':
@@ -341,6 +401,10 @@ def main():
         disable_autostart(record)
     elif args.action == 'login':
         login(record)
+    elif args.action == 'run-dock':
+        run_dock(record)
+    elif args.action == 'supervise':
+        supervise(record)
     elif args.action == 'decorate':
         decorate(record)
     elif args.action == 'restore-decoration':

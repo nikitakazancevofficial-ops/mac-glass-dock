@@ -20,6 +20,8 @@ Live desktop refraction · spring magnification · Genie animations · a glass a
 
 </div>
 
+**Update — 24 October 2026:** Fixed automatic startup after login and reboot, added automatic restart after crashes and recovery after sleep. Reboot startup has been verified on the author's laptop. Existing users should refresh their autostart configuration: [update instructions](docs/RELEASE_NOTES.md).
+
 **Update — 23 October 2026:** Fixed volume control in Control Center. The slider now correctly changes the system output volume. Pull the latest code, rebuild and restart Dock to get the fix. [Details](docs/RELEASE_NOTES.md).
 
 ## Why this dock?
@@ -168,9 +170,9 @@ python3 scripts/desktop-session.py enable-autostart
 python3 scripts/desktop-session.py status
 ```
 
-The helper waits for KDE and starts the installed glass module before Dock when full glass was installed. It uses a user XDG autostart entry, KDE's autostart-script hook and a user systemd login service; locking prevents duplicate startup. You do not need to configure these manually.
+The helper waits for KDE and starts the installed glass module before Dock when full glass was installed. The XDG/KDE autostart hooks start one user systemd supervisor. A separate service tracks Dock and automatically restarts it after an exit or crash; the supervisor recreates it after waking from sleep so its Wayland surfaces reconnect to the restored displays. Both services stop with the graphical session. You do not need to configure these manually.
 
-**Keep the project folder and `build/mac-glass-dock` in place.** After moving it, rerun installation and enable autostart from the new location. If the saved build is missing or exits during startup, the helper attempts to restore the original Plasma panel and disables its startup. A temporary KDE readiness failure restores the panel for that session and keeps a future retry enabled.
+**Keep the project folder and `build/mac-glass-dock` in place.** After moving it, rerun installation and enable autostart from the new location. If the saved build is missing, the helper attempts to restore the original Plasma panel and disables its startup. Temporary KDE/display failures and crashes keep automatic recovery enabled. Disabling autostart removes the restart policy and future startup while leaving the current Dock open.
 
 The **«Сделать основным Dock»** setting moves an existing bottom task panel to the left, preserving its widgets. **«Вернуть панель Plasma»** restores it. Panel replacement is separate from installation. Without persistent autostart, temporary panel replacement is restored at the next login.
 
